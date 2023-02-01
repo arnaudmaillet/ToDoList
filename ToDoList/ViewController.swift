@@ -14,6 +14,8 @@ class ViewController: UIViewController, UITableViewDataSource {
         table.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         return table
     }()
+    
+    var items = [String]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,17 +27,22 @@ class ViewController: UIViewController, UITableViewDataSource {
     
     @objc private func didTapAdd() {
         let alert = UIAlertController(title: "New Item", message: "Enter new to do list item !", preferredStyle: .alert)
+        
         alert.addTextField {
             field in field.placeholder = "Enter item ..."
         }
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "Done", style: .default, handler: {(_) in
+        alert.addAction(UIAlertAction(title: "Done", style: .default, handler: {[weak self] (_) in
             if let field = alert.textFields?.first {
                 if let text = field.text, !text.isEmpty {
-                    print(text)
+                    DispatchQueue.main.async {
+                        self?.items.append(text)
+                        self?.table.reloadData()
+                    }
                 }
             }
         }))
+        
         present(alert, animated: true)
     }
     
@@ -45,11 +52,14 @@ class ViewController: UIViewController, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        0
+        return items.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        
+        cell.textLabel?.text = items[indexPath.row]
+        
         return cell
     }
 
